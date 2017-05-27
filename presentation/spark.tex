@@ -1,0 +1,517 @@
+\documentclass[xcolor=dvipsnames,compact]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\usetheme{Malmoe} 
+
+\definecolor{atapurple}{HTML}{533D78}
+\usecolortheme[named=atapurple]{structure} 
+\setbeamertemplate{navigation symbols}{}
+
+
+\definecolor{atapurple}{HTML}{533D78}
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+\useoutertheme{infolines}
+\useinnertheme{circles}
+
+\makeatletter
+\setbeamertemplate{title page}[default][left,colsep=-4bp,rounded=true,shadow=\beamer@themerounded@shadow]
+\makeatother
+
+\usepackage{smartdiagram}
+\usepackage{tabularx}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\usepackage{fancyvrb}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\usepackage[default,osfigures,scale=0.95]{opensans}
+\usepackage[T1]{fontenc}
+
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{subtitle}{fg=white}
+\setbeamercolor{author}{fg=white}
+\setbeamercolor{institute}{fg=white}
+\setbeamercolor{date}{fg=white}
+\setbeamerfont{title}{size=\Huge}
+
+
+
+% šablona z webu http://voho.cz
+
+\title{Apache Spark}
+\subtitle{Lightning-fast cluster computing}
+
+%\author{\texorpdfstring{Adam Juraszek\newline\ \small{\url{adam.juraszek@ataccama.com}}}{Adam Juraszek}}
+\author{Adam Juraszek}
+\institute{Ataccama Software, s.r.o.}
+\date{\today}
+
+\smartdiagramset{text width=.5\textwidth,
+	back arrow disabled=true,
+	uniform arrow color=true,
+	module y sep=1.25}
+
+\begin{document}
+
+{
+	\usebackgroundtemplate{
+		\includegraphics[height=\paperheight,trim={9cm 0 0 0},clip]{back.png}}
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+}
+
+\begin{frame}
+	\frametitle{Přehled} 
+	\tableofcontents
+\end{frame}
+
+\section{Spark}
+
+\begin{frame}
+	\frametitle{Historie}
+	\begin{itemize}
+		\item Matei Zaharia v 2009 na Kalifornské univerzitě v Berkeley
+		\item BSD 2010
+		\item Apache 2013
+		\item Verze 1.0 (květen 2014)
+		\item[*] Rozšířená verze 1.6.3 (listopad 2016)
+		\item Verze 2.0 (červenec 2016)
+		\item Aktuálně verze 2.1.1 (květen 2017) \note{HDP 2.6 (duben 2017)}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Vlastnosti}
+	Spark je framework pro distribuované výpočty
+	\begin{itemize}
+		\item Rychlý
+		\item Jednoduchý na použití
+		\item Obecný
+		\item Široce podporovaný \note{Compatible with Hadoop}
+		\item Odolný k chybám
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Moduly a jazyky}
+	\begin{columns}[T] % align columns
+		\begin{column}{.48\textwidth}
+			Spark se skládá z několika modulů
+			\begin{itemize}
+				\item[*] Core
+				\item SQL and DataFrames
+				\item MLlib
+				\item Spark Streaming
+				\item GraphX
+			\end{itemize}
+		\end{column}
+		\begin{column}{.48\textwidth}
+			Téměř shodné API pro následující jazyky
+			\begin{itemize}
+				\item[*] Java
+				\item Scala
+				\item Python
+				\item R
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\section{Architektura}
+
+\begin{frame}[t]
+	\frametitle{Architektura}
+	\begin{description}
+		\item[Driver] Obsahuje uživatelský program a vytváří SparkContext
+		\item[Worker] Vykonává vlastní distribuovaný výpočet
+		\item[Cluster manager] Přiděluje a spravuje uzly v clusteru
+		\begin{itemize}
+			\item Local, Standalone, YARN, Mesos
+		\end{itemize}
+	\end{description}
+\only<1>{
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=.8\textwidth]{architecture.eps}
+		\end{center}
+	\end{figure}
+}
+\only<2>{
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=.35\textwidth]{standalone.eps}
+			\caption{Standalone}
+		\end{center}
+	\end{figure}
+}
+\only<3>{
+	\begin{columns}[T] % align columns
+		\begin{column}{.48\textwidth}
+			\begin{figure}
+				\begin{center}
+					\includegraphics[width=\textwidth]{yarn-client.eps}
+					\caption{Yarn-client}
+				\end{center}
+			\end{figure}
+		\end{column}
+		\begin{column}{.48\textwidth}
+			\begin{figure}
+				\begin{center}
+					\includegraphics[width=0.65\textwidth]{yarn-cluster.eps}
+					\caption{Yarn-cluster}
+				\end{center}
+			\end{figure}
+		\end{column}
+	\end{columns}
+}
+\end{frame}
+
+\section{RDD}
+
+\begin{frame}
+	\frametitle{RDD}
+	\begin{columns}[T] % align columns
+		\begin{column}{.48\textwidth}
+			Resilient Distributed Dataset 
+			\begin{itemize}
+				\item Kolekce záznamů
+				\begin{itemize}
+					\item Distribuovaná
+					\item Neměnná
+					\item Líná
+					\item Typovaná
+					\item Cachovatelná
+				\end{itemize}
+				\item Seznam oddílů
+			\end{itemize}
+		\end{column}
+		\begin{column}{.48\textwidth}
+			\begin{figure}
+				\begin{center}
+					\vskip -1cm
+					\includegraphics[width=0.3\textwidth]{partitions.eps}
+				\end{center}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Vznik RDD} 
+	\begin{itemize}
+		\item Metodou SparkContextu:
+		\begin{itemize}
+			\item \verb|sc.parallelize(collection)|
+			\item \verb|sc.hadoopFile(path, inputFormatClass,| \\
+				\tab \verb|keyClass, valueClass)|
+			\item \verb|sc.textFile(path)|
+			\item \verb|sc.wholeTextFiles(path)|
+		\end{itemize}
+		\item Transformací z existujícího RDD
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Transformace RDD}
+	\begin{itemize}
+		\item Odvození RDD z jednoho nebo více rodičů
+		\item Líné vyhodnocení
+		\item Příklady:
+		\begin{itemize}
+			\item \verb|rdd.filter(f)|
+			\item \verb|rdd.map(f)|, \verb|rdd.flatMap(f)|, \verb|rdd.mapPartitions(f)|
+			\item \verb|rdd.intersection(rdd2)|, \verb|rdd.union(rdd2)|
+			\item \verb|rdd.cartesian(rdd2)|
+			\item \verb|rdd.distinct()|
+			\item \verb|rdd.coalesce(n, shuffle)|, \verb|rdd.repartition(n)|
+		\end{itemize}
+		\item Další transformace pro párové RDD:
+		\begin{itemize}
+			\item \verb|rdd.groupByKey()|
+			\item \verb|rdd.reduceByKey(f)|
+			\item \verb|rdd.join(rdd2)|
+			\item \verb|rdd.cogroup(rdd2)|
+		\end{itemize}
+		\item Transformace může vést k vytvoření více než jednoho RDD
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Akce na RDD} 
+	\begin{itemize}
+		\item Spouští výpočet
+		\item Vrací data na Driver
+		\item Příklady:
+		\begin{itemize}
+			\item \verb|rdd.reduce(f)|, \verb|rdd.count()|, \verb|rdd.first()|
+			\item \verb|rdd.collect()|, \verb|rdd.take(n)|
+			\item \verb|rdd.saveAsTextFile(path)|, \verb|rdd.saveAsNewAPIHadoopFile(path, | \\
+				\tab \verb|keyClass, valueClass, outputFormatClass)|
+			\item \verb|rdd.foreach(f)|
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Implementace RDD}
+	\begin{itemize}
+		\item RDD je abstraktní třída:
+		\begin{itemize}
+			\item Vstupní: CheckpointRDD, NewHadoopRDD, ParallelCollectionRDD, WholeTextFileRDD
+			\item Úzké: CartesianRDD, MapPartitionsRDD, UnionRDD, ZippedPartitionsRDD
+			\item Široké: CoalescedRDD, CoGroupedRDD, ShuffledRDD, SubtractedRDD
+		\end{itemize}
+		\item Každý potomek definuje:
+		\begin{itemize}
+			\item \verb|def compute(Partition, TaskContext): Iterator[T]|
+			\item \verb|def getPartitions: Array[Partition]|
+			\item \verb|def getDependencies: Seq[Dependency[_]]|
+			\item \verb|def getPreferredLocations(Partition): Seq[String]|
+			\item \verb|val partitioner: Option[Partitioner]|
+		\end{itemize}
+		\item Další vlastnosti RDD:
+		\begin{itemize}
+			\item \verb|val id: Int|
+			\item \verb|var name: String|
+			\item \verb|var storageLevel: StorageLevel|
+			\item \verb|var checkpointData: Option[RDDCheckpointData[T]]|
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\section{Plány a spouštění}
+
+\begin{frame}
+	\frametitle{Výpočet} 
+	\begin{center}
+		\smartdiagram[flow diagram]{
+			Zavolání akce,
+			Logický plán se převede na fyzický plán,
+			Naplánují se úlohy ve fázích se splněnými závislostmi,
+			Po dokončení všech fází je výsledek zaslán driveru,
+			Je proveden checkpoint
+		}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Logický plán}
+	\begin{itemize}
+		\item Zachycuje závislosti RDD na předcích
+		\item Formálně: orientovaný acyklický graf, kde vrcholy jsou RDD a hrany jsou transformace
+	\end{itemize}
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=.75\textwidth]{word-count.eps}
+		\end{center}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[t]
+	\frametitle{Závislosti v logickém plánu}
+	Typy závislostí jsou součástí logického plánu.
+	\begin{description}
+		\item[Úzká] Oddíl potomka závisí na malém množství celých oddílů potomka.
+		Často platí: Na oddílu předka závisí nejvýše jeden oddíl potomka.
+		\only<1>{
+		\begin{columns}[T] % align columns
+			\begin{column}{.33\textwidth}
+				\begin{figure}
+					\begin{center}
+						\includegraphics[width=0.9\textwidth]{unions.eps}
+						\SaveVerb{x}|rdd1.union(rdd2)|
+						\caption{\protect\UseVerb{x}}
+					\end{center}
+				\end{figure}
+			\end{column}
+			\begin{column}{.33\textwidth}
+				\begin{figure}
+					\begin{center}
+						\includegraphics[width=0.9\textwidth]{coalesce.eps}
+						\SaveVerb{x}|rdd.coalesce(2, false)|
+						\caption{\protect\UseVerb{x}}
+					\end{center}
+				\end{figure}
+			\end{column}
+			\begin{column}{.33\textwidth}
+				\begin{figure}
+					\begin{center}
+						\includegraphics[width=0.9\textwidth]{cartesian.eps}
+						\SaveVerb{x}|rdd1.cartesian(rdd2)|
+						\caption{\protect\UseVerb{x}}
+					\end{center}
+				\end{figure}
+			\end{column}
+		\end{columns}
+		}
+		\item[Široká]<2> Na oddílu předka závisí více oddílů potomka.
+		Potomci závisí jen na části oddílu předka.
+		\begin{columns}[T] % align columns
+			\begin{column}{.33\textwidth}
+				\begin{figure}
+					\begin{center}
+						\includegraphics[width=0.9\textwidth]{shuffled.eps}
+						\SaveVerb{x}|rdd.coalesce(2, true)|
+						\caption{\protect\UseVerb{x}}
+					\end{center}
+				\end{figure}
+			\end{column}
+		\end{columns}
+	\end{description}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Fáze}
+	Logický plán je rozdělen na fáze; hranicí fáze je široká závislost.
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=0.9\textwidth]<1>{big1.eps}
+			\includegraphics[width=0.9\textwidth]<2>{big.eps}
+		\end{center}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Úlohy} 
+	\begin{itemize}
+		\item Závislost fází je daná závislostmi obsažených RDD
+		\item Výpočet fáze až po dokončení všech předků
+		\item Každému oddílu v cílovém RDD odpovídá jedna úloha:
+		\begin{description}
+			\item[Výsledná úloha] -- pokud na RDD byla zavolána akce
+			\item[Shuffle mapovací úloha] -- pokud následuje široká závislost
+		\end{description}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Výsledná úloha}
+	\begin{itemize}
+		\item Akce definuje:
+		\begin{itemize}
+			\item Úlohy, které budou potřeba
+			\item Operace provedené na závěr v úloze
+			\item Operace provedené na driveru po obdržení dat
+		\end{itemize}
+	\end{itemize}
+	\begin{table}
+		\begin{center}
+			\begin{tabularx}{\linewidth}{ C | C | C }
+				Akce & V úloze & Na driveru \\
+				\hline
+				count & count & sum \\
+				max & max & max \\
+				take & take & append \\
+				top & heap-add & heap-merge \\ 
+				collect & -- & append
+			\end{tabularx}
+		\end{center}
+		%		\caption{Ukázka tabulky}
+		%		\label{tab:tabulka}
+	\end{table}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Aplikace, joby, fáze a úlohy}
+	\begin{center}
+		\smartdiagram[flow diagram]{
+			SparkContextu odpovídá jedna aplikace,
+			Akce na RDD spouští jeden nebo více jobů,
+			Job se skládá z jedné nebo více fází,
+			Fáze obsahuje úlohu pro každý oddíl finálního RDD
+		}
+	\end{center}
+\end{frame}
+
+\section{Shuffle}
+
+\begin{frame}
+	\frametitle{Shuffle}	
+	Na hranici fází se provádí shuffle:
+	\begin{itemize}
+		\item Vždy s páry klíč -- hodnota
+		\item Roztřízení výstupu podle klíče (shuffle mapovací úloha)
+		\item Distribuce na vstup následující úlohy (pull)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Zápis shuffle}
+	\begin{description}
+		\item[Segment] část výstupu určená jednomu reduceru.
+	\end{description}
+
+	\begin{center}
+		\smartdiagram[flow diagram]{
+			Seřaď záznamy v paměti podle klíče a udržuj hranice,
+			Odlej na disk{,} pokud se nevejdou,
+			Dotřiď na disku sléváním{,} komprimuj,
+			Zaregistruj výstupní segmenty na driveru
+		}
+	\end{center}
+
+	Do verze 1.1 byl používaný hash namísto řazení
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Čtení shuffle}
+	
+	\begin{center}
+		\smartdiagram[flow diagram]{
+			Dotaž se driveru na umístění segmentů předchozí fáze,
+			Dotáhni paralelně potřebné segmenty,
+			Data okamžitě zpracuj -- udržují se v (External)AppendOnlyMap,
+			Kombinování hodnot stejného klíče je parametrizované funkcí
+		}
+	\end{center}
+
+	Kombinace: \verb|map.put(key, func(value, map.get(key)))|
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Transformace vyžadující shuffle}
+	\begin{itemize}
+		\item \verb|reduceByKey|
+		\item \verb|groupByKey|: funkce ve čtení shuffle je append
+		\item \verb|distinct|:
+		\begin{enumerate}
+			\item před: \verb|map(x -> (x, null))|
+			\item \verb|reduceByKey| s funkcí: \verb|(x, y) -> x|
+			\item po: \verb|map((x, y) -> x)|
+		\end{enumerate}
+		\item \verb|cogroup|: podobné \verb|groupByKey|, hodnoty jsou v seznamech podle indexu vstupního RDD
+		\item \verb|join|: \verb|cogroup| a následně \verb|flatMap|
+		\item \verb|intersection|:
+		\begin{enumerate}
+			\item před: \verb|map(x -> (x, null))|
+			\item \verb|cogroup|
+			\item po: \verb|filter| a \verb|map| jako u \verb|distinct|
+		\end{enumerate}
+		\item \verb|repartition|: prostý append ve čtení shuffle
+	\end{itemize}
+\end{frame}
+
+\section{Ukázka}
+
+{
+\begin{frame}
+	\begin{tikzpicture}[remember picture,overlay]
+		\node at (current page.center) {
+			\includegraphics[width=\textwidth]{big.eps}
+		};
+	\end{tikzpicture}
+	
+	
+	\setbeamercolor{coloredboxstuff}{fg=white,bg=atapurple}
+	\begin{beamercolorbox}[wd=\textwidth,sep=1em]{coloredboxstuff}
+		\begin{center}
+			\Huge Následuje ukázka
+		\end{center}
+	\end{beamercolorbox}
+
+\end{frame}
+}
+
+\end{document}

@@ -1,0 +1,21 @@
+.*
+!.gitignore
+
+# Presentation
+*.pdf
+*.eps
+*.out
+*.log
+*.aux
+*.nav
+*.snm
+*.toc
+*.vrb
+*~
+
+# Eclipse
+build/
+bin/
+
+# Data
+data/**/*.csv
