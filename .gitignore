@@ -4,6 +4,8 @@
 # Presentation
 *.pdf
 *.eps
+!spark-logo.eps
+
 *.out
 *.log
 *.aux
@@ -12,6 +14,8 @@
 *.toc
 *.vrb
 *~
+
+spark.synctex.gz
 
 # Eclipse
 build/

@@ -14,8 +14,15 @@ public class Utils {
     private Utils() {
     }
 
+    /**
+     * @param lat1
+     * @param lng1
+     * @param lat2
+     * @param lng2
+     * @return distance of two geographic points in kilometers
+     */
     public static double distance(double lat1, double lng1, double lat2, double lng2) {
-        double earthRadius = 6368.607; // in km
+        double earthRadius = 6368.607; // in km in Chicago area
         double dLat = Math.toRadians(lat2 - lat1);
         double dLng = Math.toRadians(lng2 - lng1);
         double sindLat = Math.sin(dLat / 2);
@@ -28,6 +35,14 @@ public class Utils {
         return dist;
     }
 
+    /**
+     * Simple csv parser
+     * 
+     * @param line
+     * @param delim
+     * @param quote
+     * @return
+     */
     public static String[] split(String line, String delim, String quote) {
         List<String> list = new ArrayList<>();
 
@@ -47,6 +62,14 @@ public class Utils {
         return String.format("%1$" + n + "s", str).replace(' ', '0');
     }
 
+    /**
+     * Makes "one" relative to the are in the specified distance from center.
+     * The calculation is based on areas of intermediate rings
+     * 
+     * @param d
+     *            represents interval (d-1, d]
+     * @return
+     */
     public static double distancePriority(int d) {
         double area = Math.PI * ((d + 1) * (d + 1) - d * d);
         return 1.0 / area;
@@ -58,7 +81,7 @@ public class Utils {
         list.forEach(Utils::printEntry);
     }
 
-    public static void printEntry(Entry<?, ?> entry) {
+    private static void printEntry(Entry<?, ?> entry) {
         System.out.println(entry.getKey() + " = " + entry.getValue());
     }
 }

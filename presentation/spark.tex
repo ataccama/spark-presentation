@@ -35,7 +35,15 @@
 \setbeamercolor{date}{fg=white}
 \setbeamerfont{title}{size=\Huge}
 
+\hyphenpenalty=5000
 
+\makeatletter
+\patchcmd{\beamer@sectionintoc}
+{\vfill}
+{\vskip3\itemsep}
+{}
+{}
+\makeatother 
 
 % šablona z webu http://voho.cz
 
@@ -63,8 +71,22 @@
 }
 
 \begin{frame}
-	\frametitle{Přehled} 
-	\tableofcontents
+	\frametitle{Přehled}
+	\begin{columns}[T] % align columns
+		\begin{column}{.10\textwidth}
+			% empty
+		\end{column}
+		\begin{column}{.33\textwidth}
+			\tableofcontents
+		\end{column}
+		\begin{column}{.56\textwidth}
+			\begin{figure}
+				\begin{center}
+					\includegraphics[width=.8\textwidth]{spark-logo.eps}
+				\end{center}
+			\end{figure}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \section{Spark}
